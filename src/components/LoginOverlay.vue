@@ -320,10 +320,18 @@
         formState.register.codeSending = true
         formState.register.error = ''
 
-        // 检查用户是否已存在
-        const result = await checkUser(email)
-        if (result.msg === '已存在') {
-          message.error('该邮箱已被注册')
+        // 检查用户是否已存在 (checkUser不再需要email参数)
+        const result = await checkUser()
+        // 使用isLoggedIn判断，或者根据message内容判断
+        if (result.isLoggedIn) {
+          // 假设如果能获取到用户信息，说明用户已存在或已登录
+          message.error('该邮箱已被注册或用户已登录')
+          return
+        } else if (result.message === '用户不存在' || result.status === 404) {
+          // 用户不存在，可以继续发送验证码
+        } else {
+          // 其他情况，可能需要根据实际API行为调整
+          message.error(result.message || '检查用户状态失败')
           return
         }
       } else {

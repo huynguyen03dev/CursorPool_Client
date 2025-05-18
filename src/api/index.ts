@@ -10,9 +10,11 @@ import type {
   HistoryRecord,
   HistoryAccountRecord,
   Article,
+  CheckUserResponse,
   RegisterResponse,
 } from './types'
 import Logger from '../utils/logger'
+import { apiClient } from '@/utils/apiClient'
 
 // 错误处理
 function handleApiResponse<T>(response: ApiResponse<T>): T {
@@ -41,23 +43,27 @@ export class ApiError extends Error {
 }
 
 // 用户认证相关 API
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function checkUser(email: string): Promise<ApiResponse<any>> {
+
+/**
+ * 检查用户登录状态
+ * @returns 用户登录状态信息
+ */
+export async function checkUser(): Promise<CheckUserResponse> {
   try {
-    const response = await invoke<ApiResponse<any>>('check_user', { email })
-    return response
+    const response = await apiClient.request<ApiResponse<CheckUserResponse>>('check_user')
+    return handleApiResponse(response)
   } catch (error) {
-    throw new ApiError(error instanceof Error ? error.message : '检查用户失败')
+    throw new ApiError(error instanceof Error ? error.message : '无法验证用户状态')
   }
 }
 
-export async function sendCode(email: string, type: string): Promise<void> {
+export async function sendCode(email: string, purpose: string): Promise<void> {
   try {
-    const response = await invoke<ApiResponse<void>>('send_code', {
+    const response = await apiClient.request<ApiResponse<void>>('send_code', {
       email,
-      type,
+      purpose,
     })
-    handleApiResponse(response)
+    return handleApiResponse(response)
   } catch (error) {
     throw new ApiError(error instanceof Error ? error.message : '发送验证码失败')
   }
@@ -68,53 +74,34 @@ export async function register(
   code: string,
   password: string,
   spread: string,
-): Promise<LoginResponse> {
+): Promise<RegisterResponse> {
   try {
-    const response = await invoke<ApiResponse<RegisterResponse>>('register', {
+    const response = await apiClient.request<ApiResponse<RegisterResponse>>('register', {
       email,
       code,
       password,
       spread,
     })
-    if (response.status === 200 && response.data?.token) {
-      // 保存token
-      try {
-        await saveUserApiToken(response.data.token)
-      } catch (saveError) {
-        console.error('保存token失败:', saveError)
-        // 注意：即使保存token失败，我们仍然继续流程
-      }
-
-      // 将RegisterResponse转换为LoginResponse格式
-      return {
-        token: response.data.token,
-        // userInfo在这里不可用，需要额外获取
-      }
-    }
     return handleApiResponse(response)
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : '注册失败'
-    if (errorMsg.includes('invalid type: map, expected unit')) {
-      console.warn('注册API返回格式错误，但注册可能已成功，尝试继续流程')
-      return {} as LoginResponse
-    }
-    throw new ApiError(errorMsg)
+    throw new ApiError(error instanceof Error ? error.message : '注册失败')
   }
 }
 
 export async function login(
-  account: string,
+  email: string,
   password: string,
   spread: string,
 ): Promise<LoginResponse> {
   try {
-    const response = await invoke<ApiResponse<LoginResponse>>('login', {
-      account,
+    const response = await apiClient.request<ApiResponse<LoginResponse>>('login', {
+      email,
       password,
       spread,
     })
     return handleApiResponse(response)
   } catch (error) {
+    await Logger.error('登录失败', { file: 'api/index.ts' })
     throw new ApiError(error instanceof Error ? error.message : '登录失败')
   }
 }
@@ -122,26 +109,19 @@ export async function login(
 // 用户信息相关 API
 export async function getUserInfo(): Promise<UserInfo> {
   try {
-    const response = await invoke<ApiResponse<UserInfo>>('get_user_info')
-
-    if (response.status !== 200) {
-      throw new ApiError(response.msg || '链接服务器失败')
-    }
-
+    const response = await apiClient.request<ApiResponse<UserInfo>>('get_user_info')
     return handleApiResponse(response)
   } catch (error) {
-    // 如果已经是ApiError类型，直接抛出
     if (error instanceof ApiError) {
       throw error
     }
-    // 否则包装成ApiError
     throw new ApiError(error instanceof Error ? error.message : '链接服务器失败')
   }
 }
 
 export async function getAccount(account?: string, usageCount?: string): Promise<AccountPoolInfo> {
   try {
-    const response = await invoke<ApiResponse<AccountPoolInfo>>('get_account', {
+    const response = await apiClient.request<ApiResponse<AccountPoolInfo>>('get_account', {
       account,
       usageCount,
     })
@@ -154,12 +134,11 @@ export async function getAccount(account?: string, usageCount?: string): Promise
 // Cursor 平台相关 API
 export async function getUsage(token: string): Promise<UsageInfo> {
   try {
-    const response = await invoke<ApiResponse<UsageInfo>>('get_usage', {
+    const response = await apiClient.request<ApiResponse<UsageInfo>>('get_usage', {
       token,
     })
     return handleApiResponse(response)
   } catch (error) {
-    // 检查错误类型
     const errorMsg = error instanceof Error ? error.message : String(error)
 
     if (errorMsg === 'cursor_db_error') {
@@ -177,7 +156,7 @@ export async function getUsage(token: string): Promise<UsageInfo> {
 // 系统信息相关 API
 export async function getPublicInfo(): Promise<PublicInfo> {
   try {
-    const response = await invoke<ApiResponse<PublicInfo>>('get_public_info')
+    const response = await apiClient.request<ApiResponse<PublicInfo>>('get_public_info')
     return handleApiResponse(response)
   } catch (error) {
     throw new ApiError(error instanceof Error ? error.message : '获取公共信息失败')
@@ -196,7 +175,7 @@ export async function refreshInbound(): Promise<boolean> {
 // 账户管理相关 API
 export async function activate(code: string): Promise<void> {
   try {
-    const response = await invoke<ApiResponse<void>>('activate', { code })
+    const response = await apiClient.request<ApiResponse<void>>('activate', { code })
     handleApiResponse(response)
   } catch (error) {
     throw new ApiError(error instanceof Error ? error.message : '激活失败')
@@ -205,7 +184,7 @@ export async function activate(code: string): Promise<void> {
 
 export async function changePassword(oldPassword: string, newPassword: string): Promise<void> {
   try {
-    const response = await invoke<ApiResponse<void>>('change_password', {
+    const response = await apiClient.request<ApiResponse<void>>('change_password', {
       oldPassword,
       newPassword,
     })
@@ -292,20 +271,18 @@ export async function checkHookStatus(): Promise<boolean> {
   try {
     return await invoke<boolean>('is_hook', {})
   } catch (error) {
-    console.error('检查hook状态错误:', error)
+    Logger.error(`检查hook状态错误: ${error}`)
 
-    // 如果是找不到main.js或类似错误，直接返回false而不是抛出错误
     const errorMsg = error instanceof Error ? error.message : String(error)
     if (
       errorMsg.includes('MAIN_JS_NOT_FOUND') ||
       errorMsg.includes('创建应用路径失败') ||
       errorMsg.includes('main.js 路径不存在')
     ) {
-      console.warn('找不到main.js，默认返回hook状态为false')
+      Logger.warn('找不到main.js，默认返回hook状态为false')
       return false
     }
 
-    // 其他错误继续抛出
     throw error
   }
 }
@@ -331,7 +308,7 @@ export async function findCursorPath(selectedPath: string): Promise<boolean> {
   try {
     return await invoke<boolean>('find_cursor_path', { selectedPath })
   } catch (error) {
-    console.error('查找Cursor路径错误:', error)
+    Logger.error(`查找Cursor路径错误: ${error}`)
     throw error
   }
 }
@@ -355,12 +332,12 @@ export async function restoreHook(forceKill: boolean = false): Promise<void> {
 
 export async function resetPassword(email: string, code: string, password: string): Promise<void> {
   try {
-    const response = await invoke<ApiResponse<void>>('reset_password', {
+    const response = await apiClient.request<ApiResponse<void>>('reset_password', {
       email,
       code,
       password,
     })
-    handleApiResponse(response)
+    return handleApiResponse(response)
   } catch (error) {
     throw new ApiError(error instanceof Error ? error.message : '重置密码失败')
   }
@@ -378,8 +355,8 @@ export async function launchCursor(): Promise<boolean> {
 // 登出
 export async function logout(): Promise<void> {
   try {
-    const response = await invoke<ApiResponse<void>>('logout')
-    handleApiResponse(response)
+    const response = await apiClient.request<ApiResponse<void>>('logout')
+    return handleApiResponse(response)
   } catch (error) {
     throw new ApiError(error instanceof Error ? error.message : '登出失败')
   }
@@ -393,16 +370,13 @@ export async function logout(): Promise<void> {
  */
 export async function saveHistoryRecord(record: HistoryRecord): Promise<void> {
   try {
-    // 先获取现有记录
     const records = await getHistoryRecords()
 
-    // 添加新记录
     records.push(record)
 
-    // 保存回数据库
     await setUserData('user.history', JSON.stringify(records))
   } catch (error) {
-    console.error('保存历史记录失败:', error)
+    Logger.error(`保存历史记录失败: ${error}`)
     throw new ApiError(error instanceof Error ? error.message : '保存历史记录失败')
   }
 }
@@ -413,16 +387,13 @@ export async function saveHistoryRecord(record: HistoryRecord): Promise<void> {
  */
 export async function saveHistoryRecords(records: HistoryRecord[]): Promise<void> {
   try {
-    // 先获取现有记录
     let existingRecords = await getHistoryRecords()
 
-    // 合并记录
     existingRecords = [...existingRecords, ...records]
 
-    // 保存回数据库
     await setUserData('user.history', JSON.stringify(existingRecords))
   } catch (error) {
-    console.error('批量保存历史记录失败:', error)
+    Logger.error(`批量保存历史记录失败: ${error}`)
     throw new ApiError(error instanceof Error ? error.message : '保存历史记录失败')
   }
 }
@@ -441,11 +412,11 @@ export async function getHistoryRecords(): Promise<HistoryRecord[]> {
     try {
       return JSON.parse(data) as HistoryRecord[]
     } catch (e) {
-      console.error('历史记录解析失败:', e)
+      Logger.error(`历史记录解析失败: ${e}`)
       return []
     }
   } catch (error) {
-    console.error('获取历史记录失败:', error)
+    Logger.error(`获取历史记录失败: ${error}`)
     throw new ApiError(error instanceof Error ? error.message : '获取历史记录失败')
   }
 }
@@ -457,7 +428,7 @@ export async function clearHistoryRecords(): Promise<void> {
   try {
     await delUserData('user.history')
   } catch (error) {
-    console.error('清除历史记录失败:', error)
+    Logger.error(`清除历史记录失败: ${error}`)
     throw new ApiError(error instanceof Error ? error.message : '清除历史记录失败')
   }
 }
@@ -475,7 +446,7 @@ export async function getHistoryAccounts(): Promise<HistoryAccountRecord[]> {
     try {
       return JSON.parse(data) as HistoryAccountRecord[]
     } catch (e) {
-      console.error('历史账户解析失败:', e)
+      Logger.error(`历史账户解析失败: ${e}`)
       return []
     }
   } catch (error) {
@@ -489,13 +460,10 @@ export async function getHistoryAccounts(): Promise<HistoryAccountRecord[]> {
  */
 export async function removeHistoryAccount(email: string): Promise<void> {
   try {
-    // 先获取现有账户
     let accounts = await getHistoryAccounts()
 
-    // 过滤掉要删除的账户
     accounts = accounts.filter((a) => a.email !== email)
 
-    // 保存回数据库
     await setUserData('user.history.accounts', JSON.stringify(accounts))
   } catch (error) {
     throw new ApiError(error instanceof Error ? error.message : '删除历史账户失败')
@@ -509,7 +477,7 @@ export async function clearHistoryAccounts(): Promise<void> {
   try {
     await delUserData('user.history.accounts')
   } catch (error) {
-    console.error('清除历史账户失败:', error)
+    Logger.error(`清除历史账户失败: ${error}`)
     throw new ApiError(error instanceof Error ? error.message : '清除历史账户失败')
   }
 }
@@ -522,7 +490,7 @@ export async function saveUserApiToken(token: string): Promise<void> {
   try {
     await setUserData('user.info.token', token)
   } catch (error) {
-    console.error('保存API Token失败:', error)
+    Logger.error(`保存API Token失败: ${error}`)
     throw new ApiError(error instanceof Error ? error.message : '保存API Token失败')
   }
 }
@@ -535,7 +503,7 @@ export async function getUserApiToken(): Promise<string | null> {
   try {
     return await getUserData('user.info.token')
   } catch (error) {
-    console.error('获取API Token失败:', error)
+    Logger.error(`获取API Token失败: ${error}`)
     throw new ApiError(error instanceof Error ? error.message : '获取API Token失败')
   }
 }
@@ -547,7 +515,7 @@ export async function clearUserApiToken(): Promise<void> {
   try {
     await delUserData('user.info.token')
   } catch (error) {
-    console.error('清除API Token失败:', error)
+    Logger.error(`清除API Token失败: ${error}`)
     throw new ApiError(error instanceof Error ? error.message : '清除API Token失败')
   }
 }
@@ -609,7 +577,7 @@ export async function checkDisclaimerAccepted(): Promise<boolean> {
     const value = await getUserData('user.disclaimer.accepted')
     return value === 'true'
   } catch (error) {
-    console.error('检查免责声明失败:', error)
+    Logger.error(`检查免责声明失败: ${error}`)
     return false
   }
 }
@@ -621,7 +589,7 @@ export async function setDisclaimerAccepted(): Promise<void> {
   try {
     await setUserData('user.disclaimer.accepted', 'true')
   } catch (error) {
-    console.error('设置免责声明状态失败:', error)
+    Logger.error(`设置免责声明状态失败: ${error}`)
     throw error
   }
 }
@@ -633,7 +601,7 @@ export async function clearDisclaimerAccepted(): Promise<void> {
   try {
     await delUserData('user.disclaimer.accepted')
   } catch (error) {
-    console.error('清除免责声明状态失败:', error)
+    Logger.error(`清除免责声明状态失败: ${error}`)
     throw error
   }
 }
@@ -641,11 +609,10 @@ export async function clearDisclaimerAccepted(): Promise<void> {
 // 获取公告列表
 export async function getArticleList(): Promise<Article[]> {
   try {
-    const response = await invoke<ApiResponse<Article[]>>('get_article_list')
+    const response = await apiClient.request<ApiResponse<Article[]>>('get_article_list')
     return handleApiResponse(response)
   } catch (error) {
-    // 静默处理错误，返回空数组
-    console.error('Failed to get article list:', error)
+    Logger.error(`获取公告列表失败: ${error}`)
     return []
   }
 }
@@ -657,23 +624,21 @@ export async function isArticleRead(articleId: number): Promise<boolean> {
     if (!valueStr) return false
 
     try {
-      // 尝试正确解析JSON
       const readIds = JSON.parse(valueStr) as number[]
 
-      // 确保它是一个数组
       if (Array.isArray(readIds)) {
         const result = readIds.includes(articleId)
         return result
       } else {
-        console.error('已读文章ID不是一个数组:', readIds)
+        Logger.error('已读文章ID不是一个数组:', readIds)
         return false
       }
     } catch (parseError) {
-      console.error('解析已读文章ID失败:', parseError, '原始数据:', valueStr)
+      Logger.error(`解析已读文章ID失败: ${parseError}, 原始数据: ${valueStr}`)
       return false
     }
   } catch (error) {
-    console.error('获取已读文章状态失败:', error)
+    Logger.error(`获取已读文章状态失败: ${error}`)
     return false
   }
 }
@@ -681,10 +646,10 @@ export async function isArticleRead(articleId: number): Promise<boolean> {
 // 标记文章为已读
 export async function markArticleRead(articleId: number): Promise<void> {
   try {
-    await invoke<ApiResponse<void>>('mark_article_read', { articleId })
+    const response = await apiClient.request<ApiResponse<void>>('mark_article_read', { articleId })
+    handleApiResponse(response)
   } catch (error) {
-    // 静默处理错误
-    console.error('Failed to mark article as read:', error)
+    throw new ApiError(error instanceof Error ? error.message : '标记文章已读失败')
   }
 }
 
@@ -700,7 +665,7 @@ export async function getRunningCursorPath(): Promise<string> {
   try {
     return await invoke<string>('get_running_cursor_path')
   } catch (error) {
-    console.error('获取正在运行的Cursor路径失败:', error)
+    Logger.error(`获取正在运行的Cursor路径失败: ${error}`)
     throw new ApiError(
       error instanceof Error ? error.message : '当前没有正在运行的Cursor, 请打开Cursor',
     )

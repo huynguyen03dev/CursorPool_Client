@@ -11,6 +11,7 @@ use std::fs;
 use std::time::Duration;
 use tauri::State;
 use tauri::Manager;
+use tauri::Emitter;
 use tracing::error;
 use tokio;
 
@@ -975,8 +976,12 @@ pub async fn refresh_inbound(app_handle: tauri::AppHandle) -> Result<bool, Strin
         Ok(_) => {
             error!(target: "inbound", "线路刷新成功完成");
             // 通知前端刷新完成
-            if let Err(e) = app_handle.emit_all("inbound-refreshed", ()) {
-                error!(target: "inbound", "发送线路刷新事件失败: {}", e);
+            if let Some(window) = app_handle.get_webview_window("main") {
+                if let Err(e) = window.emit("inbound-refreshed", ()) {
+                    error!(target: "inbound", "发送线路刷新事件失败: {}", e);
+                }
+            } else {
+                error!(target: "inbound", "无法获取主窗口实例");
             }
             Ok(true)
         },
