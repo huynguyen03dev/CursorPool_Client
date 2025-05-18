@@ -184,6 +184,15 @@ export async function getPublicInfo(): Promise<PublicInfo> {
   }
 }
 
+export async function refreshInbound(): Promise<boolean> {
+  try {
+    return await invoke<boolean>('refresh_inbound')
+  } catch (error) {
+    await Logger.error('刷新线路失败', { file: 'api/index.ts' })
+    throw new ApiError(error instanceof Error ? error.message : '刷新线路失败')
+  }
+}
+
 // 账户管理相关 API
 export async function activate(code: string): Promise<void> {
   try {

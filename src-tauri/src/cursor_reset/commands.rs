@@ -965,3 +965,24 @@ pub fn get_running_cursor_path() -> Result<String, String> {
         return Err(err_msg);
     }
 }
+
+#[tauri::command]
+pub async fn refresh_inbound(app_handle: tauri::AppHandle) -> Result<bool, String> {
+    error!(target: "inbound", "手动触发线路刷新");
+    
+    // 重新获取线路配置并测速
+    match crate::api::inbound::init_inbound_config(&app_handle).await {
+        Ok(_) => {
+            error!(target: "inbound", "线路刷新成功完成");
+            // 通知前端刷新完成
+            if let Err(e) = app_handle.emit_all("inbound-refreshed", ()) {
+                error!(target: "inbound", "发送线路刷新事件失败: {}", e);
+            }
+            Ok(true)
+        },
+        Err(e) => {
+            error!(target: "inbound", "线路刷新失败: {}", e);
+            Err(format!("线路刷新失败: {}", e))
+        }
+    }
+}
