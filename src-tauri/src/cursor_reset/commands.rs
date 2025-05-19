@@ -267,6 +267,10 @@ pub async fn reset_machine_id(
             ("mac_id", new_ids.get("telemetry.macMachineId").unwrap()),
             ("machineId", new_ids.get("telemetry.machineId").unwrap()),
             ("sqm_id", new_ids.get("telemetry.sqmId").unwrap()),
+            (
+                "storage.serviceMachineId",
+                new_ids.get("telemetry.devDeviceId").unwrap(),
+            ),
         ];
 
         if let Err(e) = update_database(&paths.db, &updates) {
