@@ -611,19 +611,19 @@
           <n-button
             text
             tag="a"
+            href="https://github.com/Cloxl"
+            target="_blank"
+            >Cloxl</n-button
+          >
+          &
+          <n-button
+            text
+            tag="a"
             href="https://github.com/Sanyela"
             target="_blank"
           >
             Sanyela
           </n-button>
-          &
-          <n-button
-            text
-            tag="a"
-            href="https://github.com/Cloxl"
-            target="_blank"
-            >Cloxl</n-button
-          >
         </p>
         <p>{{ t('about.license') }}</p>
       </n-space>

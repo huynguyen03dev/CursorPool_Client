@@ -134,7 +134,7 @@ export async function getAccount(account?: string, usageCount?: string): Promise
 // Cursor 平台相关 API
 export async function getUsage(token: string): Promise<UsageInfo> {
   try {
-    const response = await apiClient.request<ApiResponse<UsageInfo>>('get_usage', {
+    const response = await invoke<ApiResponse<UsageInfo>>('get_usage', {
       token,
     })
     return handleApiResponse(response)
