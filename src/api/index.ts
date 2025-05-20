@@ -89,13 +89,13 @@ export async function register(
 }
 
 export async function login(
-  email: string,
+  account: string,
   password: string,
   spread: string,
 ): Promise<LoginResponse> {
   try {
     const response = await apiClient.request<ApiResponse<LoginResponse>>('login', {
-      email,
+      account,
       password,
       spread,
     })
