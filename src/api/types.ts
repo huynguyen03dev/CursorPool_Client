@@ -76,7 +76,7 @@ export interface LoginResponse {
 // 检查用户响应
 export interface CheckUserResponse {
   status: number
-  message: string
+  msg: string
   isLoggedIn: boolean
   userInfo?: UserInfo
 }

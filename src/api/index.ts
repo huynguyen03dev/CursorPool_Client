@@ -46,11 +46,23 @@ export class ApiError extends Error {
 
 /**
  * 检查用户登录状态
+ * @param email 用户邮箱
  * @returns 用户登录状态信息
  */
-export async function checkUser(): Promise<CheckUserResponse> {
+export async function checkUser(email?: string): Promise<CheckUserResponse> {
   try {
-    const response = await apiClient.request<ApiResponse<CheckUserResponse>>('check_user')
+    const response = await apiClient.request<ApiResponse<CheckUserResponse>>('check_user', {
+      email: email || '',
+    })
+    // 直接返回原始响应中的字段，而不是通过handleApiResponse处理
+    if (response.status === 200) {
+      return {
+        status: response.status,
+        msg: response.msg,
+        isLoggedIn: response.data?.isLoggedIn || false,
+        userInfo: response.data?.userInfo,
+      }
+    }
     return handleApiResponse(response)
   } catch (error) {
     throw new ApiError(error instanceof Error ? error.message : '无法验证用户状态')
@@ -61,7 +73,7 @@ export async function sendCode(email: string, purpose: string): Promise<void> {
   try {
     const response = await apiClient.request<ApiResponse<void>>('send_code', {
       email,
-      purpose,
+      type: purpose,
     })
     return handleApiResponse(response)
   } catch (error) {

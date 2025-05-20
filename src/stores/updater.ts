@@ -35,6 +35,7 @@ export const useUpdaterStore = defineStore('updater', () => {
       error.value = null
 
       const update = await check()
+      Logger.info(`更新信息: ${JSON.stringify(update)}`)
 
       if (update) {
         hasUpdate.value = true
