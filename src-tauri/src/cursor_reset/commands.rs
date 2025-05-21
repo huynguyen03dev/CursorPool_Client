@@ -1043,75 +1043,17 @@ pub async fn cleanup_database_entries(
         }
     };
 
-    let keys_to_delete = vec![
-        "src.vs.platform.reactivestorage.browser.reactiveStorageServiceImpl.persistentStorage.applicationUser",
-        "workbench.auxiliarybar.pinnedPanels",
-        "memento/mainThreadCustomEditors.origins",
-    ];
-
-    for key in keys_to_delete {
-        match conn.execute("DELETE FROM ItemTable WHERE key = ?1", [key]) {
-            Ok(rows_affected) => {
-                if rows_affected > 0 {
-                    error!(target: "database_cleanup", "成功删除键: {}", key);
-                } else {
-                    error!(target: "database_cleanup", "键不存在或删除失败: {}", key);
-                }
+    let key_to_delete = "cursorai/serverConfig";
+    match conn.execute("DELETE FROM ItemTable WHERE key = ?1", [key_to_delete]) {
+        Ok(rows_affected) => {
+            if rows_affected > 0 {
+                error!(target: "database_cleanup", "成功删除键: {}", key_to_delete);
+            } else {
+                error!(target: "database_cleanup", "键不存在或删除失败: {}", key_to_delete);
             }
-            Err(e) => {
-                let err_msg = format!("删除键 {} 失败: {}", key, e);
-                error!(target: "database_cleanup", "{}", err_msg);
-            }
-        }
-    }
-
-    let patterns = vec![
-        "cursor%/machineId", 
-        "cursor%/deviceId", 
-        "cursor%/macAddress",
-        "cursor%/history%", 
-        "cursor%/cache%"
-    ];
-    
-    for pattern in patterns {
-        match conn.execute(
-            "DELETE FROM ItemTable WHERE key GLOB ?1 AND key NOT GLOB 'cursorAuth/*'", 
-            [pattern],
-        ) {
-            Ok(rows_affected) => {
-                if rows_affected > 0 {
-                    error!(
-                        target: "database_cleanup", 
-                        "已删除{}个匹配'{}'的条目", 
-                        rows_affected, 
-                        pattern
-                    );
-                } else {
-                    error!(
-                        target: "database_cleanup", 
-                        "没有找到匹配'{}'的条目", 
-                        pattern
-                    );
-                }
-            }
-            Err(e) => {
-                let err_msg = format!("删除模式 {} 的条目失败: {}", pattern, e);
-                error!(target: "database_cleanup", "{}", err_msg);
-            }
-        }
-    }
-
-    let key_to_upsert = "cursorAuth/stripeMembershipType";
-    let value_to_upsert = "free_trial";
-    match conn.execute(
-        "INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?1, ?2)",
-        [key_to_upsert, value_to_upsert],
-    ) {
-        Ok(_) => {
-            error!(target: "database_cleanup", "成功设置键 {} 为 {}", key_to_upsert, value_to_upsert);
         }
         Err(e) => {
-            let err_msg = format!("设置键 {} 失败: {}", key_to_upsert, e);
+            let err_msg = format!("删除键 {} 失败: {}", key_to_delete, e);
             error!(target: "database_cleanup", "{}", err_msg);
             return Err(err_msg);
         }
