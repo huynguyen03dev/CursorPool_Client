@@ -69,6 +69,7 @@ export const messages = {
       cursorNetworkError: '网络连接错误, 无法链接cursor服务器',
       cursorDataError: 'Cursor服务器返回数据格式异常',
       cursorUnknownError: 'Cursor未知错误, 请重启软件',
+      cursorProUnlimitedTip: 'Cursor最新政策改为Pro以及Pro试用用户可以无限制调用模型',
     },
     login: {
       title: '登录',
@@ -326,6 +327,8 @@ export const messages = {
       cursorNetworkError: 'Network connection error, please check your network',
       cursorDataError: 'Cursor returned data format abnormal',
       cursorUnknownError: 'Cursor unknown error, please restart the software',
+      cursorProUnlimitedTip:
+        'Cursor latest policy changed to Pro and Pro trial users can call models unlimited',
     },
     login: {
       title: 'Login',
@@ -591,6 +594,8 @@ export const messages = {
       cursorNetworkError: 'ネットワーク接続エラー、ネットワークを確認してください',
       cursorDataError: 'Cursorから返されたデータ形式が異常です',
       cursorUnknownError: 'Cursor未知のエラー、ソフトウェアを再起動してください',
+      cursorProUnlimitedTip:
+        'Cursor latest policy changed to Pro and Pro trial users can call models unlimited',
     },
     login: {
       title: 'ログイン',
@@ -851,6 +856,8 @@ export const messages = {
       cursorNetworkError: 'Erreur de connexion réseau, veuillez vérifier votre réseau',
       cursorDataError: 'Format de données anormal retourné par Cursor',
       cursorUnknownError: 'Erreur inconnue de Cursor, veuillez redémarrer le logiciel',
+      cursorProUnlimitedTip:
+        'Cursor latest policy changed to Pro and Pro trial users can call models unlimited',
     },
     login: {
       title: 'Connexion',
@@ -1108,6 +1115,8 @@ export const messages = {
       cursorNetworkError: 'Netzwerkverbindungsfehler, bitte überprüfen Sie Ihr Netzwerk',
       cursorDataError: 'Cursor lieferte abnormales Datenformat zurück',
       cursorUnknownError: 'Cursor unbekannter Fehler, bitte starten Sie die Software neu',
+      cursorProUnlimitedTip:
+        'Cursor latest policy changed to Pro and Pro trial users can call models unlimited',
     },
     login: {
       title: 'Anmeldung',
@@ -1365,6 +1374,8 @@ export const messages = {
       cursorNetworkError: '네트워크 연결 오류, 네트워크를 확인하세요',
       cursorDataError: 'Cursor가 반환한 데이터 형식이 비정상입니다',
       cursorUnknownError: 'Cursor 알 수 없는 오류, 소프트웨어를 재시작하세요',
+      cursorProUnlimitedTip:
+        'Cursor latest policy changed to Pro and Pro trial users can call models unlimited',
     },
     login: {
       title: '로그인',
@@ -1619,6 +1630,8 @@ export const messages = {
       cursorNetworkError: 'Ошибка подключения к сети, проверьте вашу сеть',
       cursorDataError: 'Cursor вернул данные в неправильном формате',
       cursorUnknownError: 'Неизвестная ошибка Cursor, перезапустите программу',
+      cursorProUnlimitedTip:
+        'Cursor latest policy changed to Pro and Pro trial users can call models unlimited',
     },
     login: {
       title: 'Вход',
@@ -1876,6 +1889,8 @@ export const messages = {
       cursorNetworkError: 'Error de conexión de red, compruebe su red',
       cursorDataError: 'Formato de datos anormal devuelto por Cursor',
       cursorUnknownError: 'Error desconocido de Cursor, reinicie el software',
+      cursorProUnlimitedTip:
+        'Cursor latest policy changed to Pro and Pro trial users can call models unlimited',
     },
     login: {
       title: 'Iniciar sesión',

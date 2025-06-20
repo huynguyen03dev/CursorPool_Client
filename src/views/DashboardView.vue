@@ -11,6 +11,8 @@
     NDivider,
     NModal,
     NScrollbar,
+    NTooltip,
+    NIcon,
     useMessage,
   } from 'naive-ui'
   import { ref, onMounted, computed, watch } from 'vue'
@@ -29,6 +31,7 @@
     checkFullDiskAccessPermission,
     requestFullDiskAccessPermission,
   } from 'tauri-plugin-macos-permissions-api'
+  import { HelpCircleOutline } from '@vicons/ionicons5'
   import Logger from '@/utils/logger'
 
   interface DeviceInfoState {
@@ -173,6 +176,7 @@
 
   // Cursor高级模型使用量百分比
   const cursorGpt4Percentage = computed(() => {
+    if (isGpt4Unlimited.value) return 100
     return cursorStore.gpt4Usage.percentage
   })
 
@@ -181,6 +185,12 @@
     // 如果没有设置maxRequestUsage或者maxRequestUsage为0，视为无限制，进度条显示为100%
     if (!deviceInfo.value.cursorInfo.usage?.['gpt-3.5-turbo']?.maxRequestUsage) return 100
     return cursorStore.gpt35Usage.percentage
+  })
+
+  // 检查高级模型是否为无限制
+  const isGpt4Unlimited = computed(() => {
+    const usage = deviceInfo.value.cursorInfo.usage?.['gpt-4']
+    return !usage?.maxRequestUsage || usage.maxRequestUsage === 0
   })
 
   // 获取用户信息
@@ -1006,7 +1016,28 @@
               class="advanced-model-usage"
             >
               <n-space justify="space-between">
-                <span>{{ i18n.dashboard.advancedModelUsage }}</span>
+                <n-space
+                  :size="4"
+                  align="center"
+                >
+                  <span>{{ i18n.dashboard.advancedModelUsage }}</span>
+                  <n-tooltip
+                    v-if="isGpt4Unlimited"
+                    trigger="hover"
+                    placement="top"
+                    style="max-width: 300px"
+                  >
+                    <template #trigger>
+                      <n-icon
+                        size="16"
+                        style="color: #999; cursor: help"
+                      >
+                        <HelpCircleOutline />
+                      </n-icon>
+                    </template>
+                    {{ i18n.dashboard.cursorProUnlimitedTip }}
+                  </n-tooltip>
+                </n-space>
                 <n-space
                   v-if="deviceInfo.cursorInfo.usage"
                   :size="0"
@@ -1016,7 +1047,10 @@
                     :to="deviceInfo.cursorInfo.usage['gpt-4']?.numRequests || 0"
                     :duration="1000"
                   />
-                  <span>/{{ deviceInfo.cursorInfo.usage['gpt-4']?.maxRequestUsage || 0 }}</span>
+                  <span v-if="isGpt4Unlimited">/{{ i18n.dashboard.unlimited }}</span>
+                  <span v-else
+                    >/{{ deviceInfo.cursorInfo.usage['gpt-4']?.maxRequestUsage || 0 }}</span
+                  >
                 </n-space>
                 <span v-else>{{ getCursorErrorMessage(deviceInfo.cursorInfo.errorType) }}</span>
               </n-space>
