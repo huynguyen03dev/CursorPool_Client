@@ -18,7 +18,33 @@
 - ⚙️ 会员系统：解锁更多高级功能
 
 ---
+## 构建教程
+### 步骤
 
+**1. 获取代码**
+```bash
+git clone https://github.com/Cloxl/CursorPool_Client.git && cd CursorPool_Client && pnpm i
+```
+
+**2. 后端开发**  
+根据 `swagger.json` 编写 API
+
+**3. 密钥配置**  
+根据文档[tauri updater](https://tauri.app/plugin/updater/)生成密钥 → 配置到 `tauri.conf.json` 和 GitHub 项目密钥中
+
+**4. 安装依赖和构建**
+```bash
+pnpm tauri build
+```
+
+---
+### cursor pool 官方后端技术栈:  
+![Gin](https://img.shields.io/badge/Gin-00ADD8?style=for-the-badge&logo=gin&logoColor=white) ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white) ![K8s](https://img.shields.io/badge/kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white) ![阿里云](https://img.shields.io/badge/阿里云-4D4D4D?style=for-the-badge&logo=alipay&logoColor=white)
+
+后端可以使用任何语言 满足swagger.json的api即可
+
+### **相关**: [Cursor纯协议注册机项目](https://github.com/CloxlAuto_Cursor)
+---
 ## 📜 开源协议声明
 
 ### 使用条款
