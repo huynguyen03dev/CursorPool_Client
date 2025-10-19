@@ -31,15 +31,29 @@ const initializeDatabase = () => {
         return
       }
 
-      db.exec(sql, (err) => {
-        if (err) {
-          console.error('Error executing schema:', err.message)
-          reject(err)
+      const statements = sql
+        .split(';')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0)
+
+      const executeStatement = (index) => {
+        if (index >= statements.length) {
+          console.log('Database schema initialized successfully')
+          resolve()
           return
         }
-        console.log('Database schema initialized successfully')
-        resolve()
-      })
+
+        db.run(statements[index], (err) => {
+          if (err && !err.message.includes('already exists')) {
+            console.error('Error executing statement:', err.message)
+            reject(err)
+            return
+          }
+          executeStatement(index + 1)
+        })
+      }
+
+      executeStatement(0)
     })
   })
 }

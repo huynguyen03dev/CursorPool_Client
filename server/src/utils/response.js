@@ -54,4 +54,16 @@ class ApiResponse {
   }
 }
 
-module.exports = ApiResponse
+function sendSuccess(res, data = null, msg = 'Success', code = '0') {
+  return res.status(200).json(ApiResponse.success(data, msg, code))
+}
+
+function sendError(res, msg = 'Error', statusCode = 400, code = '-1') {
+  return res.status(statusCode).json(ApiResponse.error(msg, code, statusCode))
+}
+
+module.exports = {
+  ApiResponse,
+  sendSuccess,
+  sendError,
+}

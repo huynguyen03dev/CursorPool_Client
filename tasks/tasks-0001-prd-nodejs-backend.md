@@ -32,6 +32,14 @@
 - `server/database/schema.sql` - Complete database schema with all tables (users, email_verification_codes, accounts_pool, activation_codes, articles, bug_reports, public_info)
 - `server/src/config/database.js` - SQLite database connection with promise-based query methods and schema initialization
 - `server/database/seed.sql` - Sample data with test user, 3 accounts, 5 activation codes, 3 articles, and public info
+- `server/src/services/tokenService.js` - JWT token generation and verification with error handling
+- `server/src/services/emailService.js` - Email verification code generation, storage, and validation with 10min expiry
+- `server/src/middleware/auth.js` - JWT authentication middleware with Bearer token extraction
+- `server/src/middleware/validator.js` - Request validation middleware for email, password, and username
+- `server/src/controllers/authController.js` - Authentication controller with checkUser, sendEmailCode, register, login, and resetPassword functions
+- `server/src/routes/auth.js` - Authentication routes wired to /api/auth endpoints
+- `server/src/config/database.js` - Updated with proper schema initialization (handles existing indexes gracefully)
+- `server/src/utils/response.js` - Updated with sendSuccess and sendError helper functions
 
 **To Be Created:**
 
@@ -90,18 +98,18 @@
   - [x] 2.7 Create `database/seed.sql` with sample data (2-3 accounts, 5 activation codes, 1 test user, sample articles)
   - [x] 2.8 Add database initialization logic to auto-create tables on first run
 
-- [ ] **3.0 Authentication System Implementation**
-  - [ ] 3.1 Create `src/services/tokenService.js` with JWT sign/verify functions
-  - [ ] 3.2 Create `src/services/emailService.js` for verification code generation and logging
-  - [ ] 3.3 Create `src/middleware/auth.js` for JWT token verification and user extraction
-  - [ ] 3.4 Create `src/middleware/validator.js` for email format and input validation
-  - [ ] 3.5 Create `src/controllers/authController.js` with checkUser function
-  - [ ] 3.6 Implement sendEmailCode function (generate 6-digit code, store with 10min expiry, log to console)
-  - [ ] 3.7 Implement register function (verify code, hash password with bcrypt, create user, return JWT)
-  - [ ] 3.8 Implement login function (verify credentials, generate JWT, return token + user info)
-  - [ ] 3.9 Implement resetPassword function (verify code, update password hash)
-  - [ ] 3.10 Create `src/routes/auth.js` and wire all authentication endpoints with proper body parsing
-  - [ ] 3.11 Test all auth endpoints match swagger.json response format
+- [x] **3.0 Authentication System Implementation**
+  - [x] 3.1 Create `src/services/tokenService.js` with JWT sign/verify functions
+  - [x] 3.2 Create `src/services/emailService.js` for verification code generation and logging
+  - [x] 3.3 Create `src/middleware/auth.js` for JWT token verification and user extraction
+  - [x] 3.4 Create `src/middleware/validator.js` for email format and input validation
+  - [x] 3.5 Create `src/controllers/authController.js` with checkUser function
+  - [x] 3.6 Implement sendEmailCode function (generate 6-digit code, store with 10min expiry, log to console)
+  - [x] 3.7 Implement register function (verify code, hash password with bcrypt, create user, return JWT)
+  - [x] 3.8 Implement login function (verify credentials, generate JWT, return token + user info)
+  - [x] 3.9 Implement resetPassword function (verify code, update password hash)
+  - [x] 3.10 Create `src/routes/auth.js` and wire all authentication endpoints with proper body parsing
+  - [x] 3.11 Test all auth endpoints match swagger.json response format
 
 - [ ] **4.0 User Management & Account Pool**
   - [ ] 4.1 Create `src/controllers/userController.js` with getUserInfo function (extract user from JWT, return quota info)

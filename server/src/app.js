@@ -23,6 +23,8 @@ app.use((req, res, next) => {
   next()
 })
 
+const authRoutes = require('./routes/auth')
+
 const apiRouter = express.Router()
 
 apiRouter.get('/health', (req, res) => {
@@ -36,6 +38,8 @@ apiRouter.get('/health', (req, res) => {
     code: '0',
   })
 })
+
+apiRouter.use('/auth', authRoutes)
 
 app.use('/api', apiRouter)
 
