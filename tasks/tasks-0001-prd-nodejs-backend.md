@@ -40,32 +40,21 @@
 - `server/src/routes/auth.js` - Authentication routes wired to /api/auth endpoints
 - `server/src/config/database.js` - Updated with proper schema initialization (handles existing indexes gracefully)
 - `server/src/utils/response.js` - Updated with sendSuccess and sendError helper functions
+- `server/src/controllers/userController.js` - User controller with getUserInfo, updatePassword, and activate functions
+- `server/src/routes/user.js` - User management routes wired to /api/user endpoints with auth middleware
+- `server/src/controllers/accountPoolController.js` - Account pool controller with getAccount function and quota/usage logic
+- `server/src/routes/accountPool.js` - Account pool routes wired to /api/accountpool endpoints with auth middleware
+- `server/src/app.js` - Updated with user and accountpool routes
 
 **To Be Created:**
 
-- `server/src/app.js` - Express application entry point and server setup
-- `server/src/config/database.js` - SQLite database connection and initialization
-- `server/database/schema.sql` - Complete database schema with all tables
-- `server/src/middleware/auth.js` - JWT authentication middleware
 - `server/src/middleware/rateLimiter.js` - Rate limiting middleware for API protection
-- `server/src/middleware/validator.js` - Request validation middleware
-- `server/src/middleware/errorHandler.js` - Centralized error handling
-- `server/src/routes/auth.js` - Authentication endpoints (register, login, reset password)
-- `server/src/routes/user.js` - User management endpoints
-- `server/src/routes/accountPool.js` - Account pool endpoints
 - `server/src/routes/system.js` - System endpoints (public info, articles, version)
 - `server/src/routes/admin.js` - Admin endpoints for managing accounts and codes
-- `server/src/controllers/authController.js` - Authentication business logic
-- `server/src/controllers/userController.js` - User management business logic
-- `server/src/controllers/accountPoolController.js` - Account pool business logic
 - `server/src/controllers/systemController.js` - System endpoints business logic
 - `server/src/controllers/adminController.js` - Admin endpoints business logic
-- `server/src/services/tokenService.js` - JWT token generation and verification
-- `server/src/services/emailService.js` - Email verification code service
-- `server/src/utils/response.js` - Standard API response formatter
 - `server/src/utils/validation.js` - Input validation helpers
 - `server/README.md` - Backend setup and usage documentation
-- `server/database/seed.sql` - Sample data for development (accounts, activation codes)
 
 ### Notes
 
@@ -111,15 +100,15 @@
   - [x] 3.10 Create `src/routes/auth.js` and wire all authentication endpoints with proper body parsing
   - [x] 3.11 Test all auth endpoints match swagger.json response format
 
-- [ ] **4.0 User Management & Account Pool**
-  - [ ] 4.1 Create `src/controllers/userController.js` with getUserInfo function (extract user from JWT, return quota info)
-  - [ ] 4.2 Implement updatePassword function (verify old password, validate new password, update hash)
-  - [ ] 4.3 Implement activate function (verify activation code, update user expiry and level, increment code usage)
-  - [ ] 4.4 Create `src/routes/user.js` and wire user endpoints with auth middleware
-  - [ ] 4.5 Create `src/controllers/accountPoolController.js` with getAccount function
-  - [ ] 4.6 Implement account pool selection logic (check user quota, select least-used account, increment usage)
-  - [ ] 4.7 Create `src/routes/accountPool.js` and wire endpoint with auth middleware
-  - [ ] 4.8 Test account distribution works correctly and user quota decrements
+- [x] **4.0 User Management & Account Pool**
+  - [x] 4.1 Create `src/controllers/userController.js` with getUserInfo function (extract user from JWT, return quota info)
+  - [x] 4.2 Implement updatePassword function (verify old password, validate new password, update hash)
+  - [x] 4.3 Implement activate function (verify activation code, update user expiry and level, increment code usage)
+  - [x] 4.4 Create `src/routes/user.js` and wire user endpoints with auth middleware
+  - [x] 4.5 Create `src/controllers/accountPoolController.js` with getAccount function
+  - [x] 4.6 Implement account pool selection logic (check user quota, select least-used account, increment usage)
+  - [x] 4.7 Create `src/routes/accountPool.js` and wire endpoint with auth middleware
+  - [x] 4.8 Test account distribution works correctly and user quota decrements
 
 - [ ] **5.0 System Endpoints & Admin Features**
   - [ ] 5.1 Create `src/controllers/systemController.js` with getPublicInfo function (return active announcement or default)
