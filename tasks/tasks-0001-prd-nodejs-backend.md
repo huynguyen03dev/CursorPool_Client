@@ -29,6 +29,9 @@
 - `server/src/utils/response.js` - Standard API response formatter with success/error helpers
 - `server/src/middleware/errorHandler.js` - Centralized error handling middleware with logging
 - `server/src/app.js` - Express application setup with CORS, body parsing, and /api base routing
+- `server/database/schema.sql` - Complete database schema with all tables (users, email_verification_codes, accounts_pool, activation_codes, articles, bug_reports, public_info)
+- `server/src/config/database.js` - SQLite database connection with promise-based query methods and schema initialization
+- `server/database/seed.sql` - Sample data with test user, 3 accounts, 5 activation codes, 3 articles, and public info
 
 **To Be Created:**
 
@@ -77,15 +80,15 @@
   - [x] 1.6 Create `src/app.js` with Express setup, CORS configuration, body parsing, and `/api` base path routing
   - [x] 1.7 Add start script and verify server runs on port 3000
 
-- [ ] **2.0 Database Schema & Models**
-  - [ ] 2.1 Create `database/schema.sql` with users table (id, email, username, password_hash, level, total_count, used_count, expire_time, created_at, updated_at)
-  - [ ] 2.2 Add email_verification_codes table (id, email, code, type, expires_at, used, created_at)
-  - [ ] 2.3 Add accounts_pool table (id, account, password, token, usage_count, status, distributed_time, created_at, updated_at)
-  - [ ] 2.4 Add activation_codes table (id, code, type, name, level, duration, max_uses, used_count, status, notes, activated_at, expired_at, created_at)
-  - [ ] 2.5 Add articles, bug_reports, and public_info tables
-  - [ ] 2.6 Create `src/config/database.js` for SQLite connection and schema initialization
-  - [ ] 2.7 Create `database/seed.sql` with sample data (2-3 accounts, 5 activation codes, 1 test user, sample articles)
-  - [ ] 2.8 Add database initialization logic to auto-create tables on first run
+- [x] **2.0 Database Schema & Models**
+  - [x] 2.1 Create `database/schema.sql` with users table (id, email, username, password_hash, level, total_count, used_count, expire_time, created_at, updated_at)
+  - [x] 2.2 Add email_verification_codes table (id, email, code, type, expires_at, used, created_at)
+  - [x] 2.3 Add accounts_pool table (id, account, password, token, usage_count, status, distributed_time, created_at, updated_at)
+  - [x] 2.4 Add activation_codes table (id, code, type, name, level, duration, max_uses, used_count, status, notes, activated_at, expired_at, created_at)
+  - [x] 2.5 Add articles, bug_reports, and public_info tables
+  - [x] 2.6 Create `src/config/database.js` for SQLite connection and schema initialization
+  - [x] 2.7 Create `database/seed.sql` with sample data (2-3 accounts, 5 activation codes, 1 test user, sample articles)
+  - [x] 2.8 Add database initialization logic to auto-create tables on first run
 
 - [ ] **3.0 Authentication System Implementation**
   - [ ] 3.1 Create `src/services/tokenService.js` with JWT sign/verify functions

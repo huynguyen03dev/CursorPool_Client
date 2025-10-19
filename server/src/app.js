@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const errorHandler = require('./middleware/errorHandler')
+const { initializeDatabase } = require('./config/database')
 
 const app = express()
 
@@ -43,11 +44,19 @@ app.use(errorHandler)
 const PORT = process.env.PORT || 3000
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-    console.log(`API base URL: http://localhost:${PORT}/api`)
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
-  })
+  initializeDatabase()
+    .then(() => {
+      console.log('Database initialized successfully')
+      app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`)
+        console.log(`API base URL: http://localhost:${PORT}/api`)
+        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
+      })
+    })
+    .catch((err) => {
+      console.error('Failed to initialize database:', err)
+      process.exit(1)
+    })
 }
 
 module.exports = app
