@@ -629,7 +629,7 @@
   <n-modal v-model:show="showForgotPassword">
     <n-card
       style="width: 400px"
-      :title="messages[currentLang].login.loginButton === '登录' ? '重置密码' : 'Reset Password'"
+      :title="currentLang === 'zh-CN' ? '重置密码' : 'Reset Password'"
     >
       <n-form class="compact-form">
         <n-form-item :label="messages[currentLang].login.emailPlaceholder">
@@ -687,14 +687,14 @@
 
         <n-space justify="end">
           <n-button @click="showForgotPassword = false">
-            {{ messages[currentLang].login.loginButton === '登录' ? '取消' : 'Cancel' }}
+            {{ currentLang === 'zh-CN' ? '取消' : 'Cancel' }}
           </n-button>
           <n-button
             type="primary"
             :loading="forgotPasswordLoading"
             @click="handleForgotPassword"
           >
-            {{ messages[currentLang].login.loginButton === '登录' ? '重置密码' : 'Reset Password' }}
+            {{ currentLang === 'zh-CN' ? '重置密码' : 'Reset Password' }}
           </n-button>
         </n-space>
       </n-form>
