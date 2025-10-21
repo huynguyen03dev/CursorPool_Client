@@ -35,7 +35,7 @@ where
                 last_err = Some(e);
                 error!(
                     target: "retry",
-                    "{}失败，尝试重试 ({}/{}): {:?}",
+                    "{} failed, retrying ({}/{}): {:?}",
                     operation_name, attempt, retries, err_clone
                 );
                 

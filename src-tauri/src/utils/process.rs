@@ -27,7 +27,7 @@ impl ProcessManager {
         for attempt in 1..=MAX_ATTEMPTS {
             let processes = self
                 .get_cursor_processes()
-                .map_err(|e| format!("获取进程列表失败: {}", e))?;
+                .map_err(|e| format!("Failed to get process list: {}", e))?;
 
             if processes.is_empty() {
                 thread::sleep(Duration::from_secs(1));
@@ -51,7 +51,7 @@ impl ProcessManager {
             }
 
             if attempt == MAX_ATTEMPTS {
-                return Err("达到最大重试次数,仍无法终止所有Cursor进程".to_string());
+                return Err("Reached maximum retry attempts, still unable to terminate all Cursor processes".to_string());
             }
         }
 
@@ -94,14 +94,14 @@ impl ProcessManager {
             "windows" => ("tasklist", vec!["/FO", "CSV", "/NH"]),
             "macos" => ("ps", vec!["-ax"]),
             "linux" => ("ps", vec!["-A"]),
-            _ => return Err("不支持的操作系统".to_string()),
+            _ => return Err("Unsupported operating system".to_string()),
         };
 
         let mut command = self.create_hidden_command(cmd);
         let output = command
             .args(&args)
             .output()
-            .map_err(|e| format!("执行命令失败: {}", e))?;
+            .map_err(|e| format!("Failed to execute command: {}", e))?;
 
         let output_str = String::from_utf8_lossy(&output.stdout);
         Ok(self.parse_cursor_pool_processes(&output_str))
@@ -151,14 +151,14 @@ impl ProcessManager {
             "windows" => ("tasklist", vec!["/FO", "CSV", "/NH"]),
             "macos" => ("ps", vec!["-ax"]),
             "linux" => ("ps", vec!["-A"]),
-            _ => return Err("不支持的操作系统".to_string()),
+            _ => return Err("Unsupported operating system".to_string()),
         };
 
         let mut command = self.create_hidden_command(cmd);
         let output = command
             .args(&args)
             .output()
-            .map_err(|e| format!("执行命令失败: {}", e))?;
+            .map_err(|e| format!("Failed to execute command: {}", e))?;
 
         let output_str = String::from_utf8_lossy(&output.stdout);
         Ok(self.parse_process_list(&output_str))
@@ -239,14 +239,14 @@ impl ProcessManager {
         let (cmd, args) = match std::env::consts::OS {
             "windows" => ("taskkill", vec!["/F", "/PID", pid]),
             "macos" | "linux" => ("kill", vec!["-9", pid]),
-            _ => return Err("不支持的操作系统".to_string()),
+            _ => return Err("Unsupported operating system".to_string()),
         };
 
         let mut command = self.create_hidden_command(cmd);
         command
             .args(&args)
             .output()
-            .map_err(|e| format!("终止进程失败: {}", e))?;
+            .map_err(|e| format!("Failed to terminate process: {}", e))?;
 
         Ok(())
     }
@@ -277,7 +277,7 @@ mod tests {
         // 测试终止进程
         match manager.kill_cursor_processes() {
             Ok(_) => println!("成功终止所有Cursor进程"),
-            Err(e) => println!("终止进程失败: {}", e),
+            Err(e) => println!("Failed to terminate process: {}", e),
         }
     }
 
