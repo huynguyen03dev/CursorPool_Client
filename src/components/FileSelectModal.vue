@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { NModal, NSpace, NIcon, useMessage, NButton, useThemeVars } from 'naive-ui'
   import { useCursorStore, useAppStore } from '@/stores'
+  import { useI18n } from '../locales'
   import { watch, computed, ref } from 'vue'
   import { useTheme } from '../composables/theme'
   import {
@@ -31,6 +32,7 @@
   const cursorStore = useCursorStore()
   // 获取消息组件
   const message = useMessage()
+  const { t } = useI18n()
 
   // 监听文件选择状态变化，提供消息反馈
   watch(
@@ -52,19 +54,19 @@
 
     // 处理成功状态
     if (!cursorStore.showSelectFileModal && !cursorStore.fileSelectError) {
-      message.success('文件选择成功，系统已找到并保存Cursor路径')
+      message.success(t('fileSelect.fileSelectSuccess'))
 
       // 检查是否有待处理操作
       if (cursorStore.pendingAction) {
-        message.loading(`正在执行${cursorStore.pendingAction.type}操作...`)
+        message.loading(`Executing ${cursorStore.pendingAction.type} operation...`)
 
         // 等待操作完成
         setTimeout(() => {
           if (!cursorStore.fileSelectError) {
             if (cursorStore.pendingAction?.type === 'applyHook') {
-              message.success('Hook应用成功！')
+              message.success(t('fileSelect.hookApplySuccess'))
             } else if (cursorStore.pendingAction?.type === 'restoreHook') {
-              message.success('Hook恢复成功！')
+              message.success(t('fileSelect.hookRestoreSuccess'))
             }
           }
         }, 1000)
@@ -86,11 +88,11 @@
   // 打开macOS权限设置
   const handleOpenMacOSPermissionSettings = async () => {
     try {
-      message.loading('正在打开系统偏好设置...')
+      message.loading('Opening system preferences...')
       await cursorStore.openMacOSPermissionSettings()
-      message.success('已打开系统偏好设置，请给予应用所需权限')
+      message.success(t('fileSelect.openSystemPreferences'))
     } catch (error) {
-      message.error('打开系统偏好设置失败，请手动打开')
+      message.error(t('fileSelect.openSystemPreferencesFailed'))
     }
   }
 
@@ -108,15 +110,15 @@
           const result = await cursorStore.applyHookToClient(true) // 强制关闭
 
           if (result.status === 'success') {
-            message.success('Hook应用成功！')
+            message.success(t('fileSelect.hookApplySuccess'))
             cursorStore.showSelectFileModal = false
           } else if (
             result.status === 'error' &&
             result.errorType === cursorStore.macOSPermissionError
           ) {
-            message.error('权限验证失败，请确保已正确授予权限')
+            message.error(t('fileSelect.permissionValidationFailed'))
           } else if (result.status === 'running') {
-            message.warning('Cursor仍在运行，请手动关闭Cursor后重试')
+            message.warning('Cursor is still running, please manually close Cursor and try again')
           }
         }
       }

@@ -11,21 +11,21 @@
       type: Boolean,
       required: true,
     },
-    // 模态框标题
+    // Modal title
     title: {
       type: String,
-      default: 'Cursor 正在运行',
+      default: 'Cursor is Running',
     },
-    // 模态框内容
+    // Modal content
     content: {
       type: String,
       default:
-        '检测到 Cursor 正在运行, 请保存尚未更改的项目再继续操作! 不保存会导致Cursor报错! 报错了请别联系客服!',
+        'Cursor is running, please save your work before continuing! Not saving will cause Cursor errors! If errors occur, do not contact customer service!',
     },
-    // 确认按钮文本
+    // Confirm button text
     confirmButtonText: {
       type: String,
-      default: '我已保存, 强制关闭',
+      default: 'I have saved, force close',
     },
     // 确认按钮类型
     confirmButtonType: {

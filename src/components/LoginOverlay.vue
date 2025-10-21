@@ -604,7 +604,7 @@
                 v-model:value="formState.register.confirmPassword"
                 type="password"
                 show-password-on="click"
-                placeholder="请再次输入密码"
+                :placeholder="t('login.confirmPasswordPlaceholder')"
                 maxlength="20"
               />
             </n-form-item>

@@ -193,8 +193,8 @@
             result.status === 'error' &&
             result.errorType === cursorStore.macOSPermissionError
           ) {
-            // 处理macOS权限错误
-            message.error('无法终止Cursor进程，需要系统权限')
+            // Handle macOS permission error
+            message.error(t('systemControl.messages.macOSPermissionError'))
             cursorStore.setPendingAction(action, {
               forceKill: force_kill,
               errorType: cursorStore.macOSPermissionError,

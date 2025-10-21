@@ -2,17 +2,20 @@
   import { computed } from 'vue'
   import { NProgress, NSpin, NCard, NSpace, NButton } from 'naive-ui'
   import { useUpdaterStore } from '../stores/updater'
+  import { useI18n } from '../locales'
 
   const updaterStore = useUpdaterStore()
+  const { t } = useI18n()
 
-  // 计算下载状态文本
+  // Calculate download status text
   const statusText = computed(() => {
-    if (updaterStore.isWebView2Update) return `发现新版本，请前往官网下载`
-    if (updaterStore.isChecking) return '正在检查更新...'
-    if (updaterStore.isDownloading) return `正在下载更新 (${updaterStore.progressPercentage}%)...`
-    if (updaterStore.isInstalling) return '正在安装更新，应用即将重启...'
-    if (updaterStore.error) return `更新失败: ${updaterStore.error}`
-    return '准备更新...'
+    if (updaterStore.isWebView2Update) return t('dashboard.updateWebView2Message')
+    if (updaterStore.isChecking) return t('dashboard.updateChecking')
+    if (updaterStore.isDownloading)
+      return t('dashboard.updateDownloading', { percentage: `${updaterStore.progressPercentage}%` })
+    if (updaterStore.isInstalling) return t('dashboard.updateInstalling')
+    if (updaterStore.error) return t('dashboard.updateError', { error: updaterStore.error })
+    return t('dashboard.updateReady')
   })
 
   // 计算进度条颜色
