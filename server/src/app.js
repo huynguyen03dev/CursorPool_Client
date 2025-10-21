@@ -26,6 +26,8 @@ app.use((req, res, next) => {
 const authRoutes = require('./routes/auth')
 const userRoutes = require('./routes/user')
 const accountPoolRoutes = require('./routes/accountPool')
+const systemRoutes = require('./routes/system')
+const adminRoutes = require('./routes/admin')
 
 const apiRouter = express.Router()
 
@@ -41,9 +43,11 @@ apiRouter.get('/health', (req, res) => {
   })
 })
 
-apiRouter.use('/auth', authRoutes)
+apiRouter.use('/', authRoutes)
 apiRouter.use('/user', userRoutes)
 apiRouter.use('/accountpool', accountPoolRoutes)
+apiRouter.use('/', systemRoutes)
+apiRouter.use('/admin', adminRoutes)
 
 app.use('/api', apiRouter)
 

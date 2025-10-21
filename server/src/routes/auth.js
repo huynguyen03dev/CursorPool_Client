@@ -11,15 +11,12 @@ const {
   validateEmailMiddleware,
   validateRegistrationMiddleware,
 } = require('../middleware/validator')
+const { sendEmailCodeLimiter, authLimiter } = require('../middleware/rateLimiter')
 
-router.post('/check-user', validateEmailMiddleware, checkUser)
-
-router.post('/send-email-code', validateEmailMiddleware, sendEmailCode)
-
-router.post('/register', validateRegistrationMiddleware, register)
-
-router.post('/login', login)
-
-router.post('/reset-password', resetPassword)
+router.post('/checkUser', authLimiter, validateEmailMiddleware, checkUser)
+router.post('/register/sendEmailCode', sendEmailCodeLimiter, validateEmailMiddleware, sendEmailCode)
+router.post('/emailRegister', authLimiter, validateRegistrationMiddleware, register)
+router.post('/login', authLimiter, login)
+router.post('/emailResetPassword', authLimiter, resetPassword)
 
 module.exports = router

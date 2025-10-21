@@ -44,16 +44,11 @@ async function sendEmailCode(req, res) {
 
 async function register(req, res) {
   try {
-    const { email, username, password, code } = req.body
+    const { email, password, code } = req.body
 
     const existingUser = await db.get('SELECT id FROM users WHERE email = ?', [email])
     if (existingUser) {
       return sendError(res, 'Email already registered', 400)
-    }
-
-    const existingUsername = await db.get('SELECT id FROM users WHERE username = ?', [username])
-    if (existingUsername) {
-      return sendError(res, 'Username already taken', 400)
     }
 
     const verification = await verifyCode(email, code, 'register')
@@ -62,6 +57,8 @@ async function register(req, res) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10)
+
+    const username = email.split('@')[0]
 
     const result = await db.run(
       `INSERT INTO users (email, username, password_hash, level, total_count, used_count, expire_time, created_at, updated_at)
@@ -78,18 +75,13 @@ async function register(req, res) {
       level: 0,
     })
 
+    const expiresTime = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60
+
     return sendSuccess(
       res,
       {
         token,
-        user: {
-          id: userId,
-          email,
-          username,
-          level: 0,
-          total_count: 0,
-          used_count: 0,
-        },
+        expires_time: expiresTime,
       },
       'Registration successful',
     )
@@ -101,15 +93,16 @@ async function register(req, res) {
 
 async function login(req, res) {
   try {
-    const { email, password } = req.body
+    const { account, email, password } = req.body
+    const loginEmail = account || email
 
-    if (!email || !password) {
+    if (!loginEmail || !password) {
       return sendError(res, 'Email and password are required', 400)
     }
 
     const user = await db.get(
       'SELECT id, email, username, password_hash, level, total_count, used_count, expire_time FROM users WHERE email = ?',
-      [email],
+      [loginEmail],
     )
 
     if (!user) {
@@ -128,18 +121,29 @@ async function login(req, res) {
       level: user.level,
     })
 
+    const expireTime = new Date(user.expire_time)
+    const isExpired = expireTime < new Date()
+
     return sendSuccess(
       res,
       {
         token,
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
+        user_info: {
+          totalCount: user.total_count,
+          usedCount: user.used_count,
+          expireTime: user.expire_time,
           level: user.level,
-          total_count: user.total_count,
-          used_count: user.used_count,
-          expire_time: user.expire_time,
+          isExpired,
+          username: user.username,
+          code_level:
+            user.level === 0
+              ? 'Free'
+              : user.level === 1
+                ? 'Basic'
+                : user.level === 2
+                  ? 'Pro'
+                  : 'Premium',
+          code_status: 1,
         },
       },
       'Login successful',
@@ -152,13 +156,13 @@ async function login(req, res) {
 
 async function resetPassword(req, res) {
   try {
-    const { email, code, newPassword } = req.body
+    const { email, code, password } = req.body
 
-    if (!email || !code || !newPassword) {
-      return sendError(res, 'Email, code, and new password are required', 400)
+    if (!email || !code || !password) {
+      return sendError(res, 'Email, code, and password are required', 400)
     }
 
-    if (newPassword.length < 6) {
+    if (password.length < 6) {
       return sendError(res, 'Password must be at least 6 characters', 400)
     }
 
@@ -172,7 +176,7 @@ async function resetPassword(req, res) {
       return sendError(res, verification.error, 400)
     }
 
-    const passwordHash = await bcrypt.hash(newPassword, 10)
+    const passwordHash = await bcrypt.hash(password, 10)
 
     await db.run(
       "UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE email = ?",

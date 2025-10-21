@@ -34,12 +34,12 @@ function validateEmailMiddleware(req, res, next) {
 }
 
 function validateRegistrationMiddleware(req, res, next) {
-  const { email, username, password } = req.body
+  const { email, password } = req.body
 
-  if (!email || !username || !password) {
+  if (!email || !password) {
     return res.status(400).json({
       status: false,
-      msg: 'Email, username, and password are required',
+      msg: 'Email and password are required',
       code: 400,
     })
   }
@@ -48,14 +48,6 @@ function validateRegistrationMiddleware(req, res, next) {
     return res.status(400).json({
       status: false,
       msg: 'Invalid email format',
-      code: 400,
-    })
-  }
-
-  if (!validateUsername(username)) {
-    return res.status(400).json({
-      status: false,
-      msg: 'Username must be 3-20 characters',
       code: 400,
     })
   }

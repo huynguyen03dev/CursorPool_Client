@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS activation_codes (
   name TEXT,
   level INTEGER DEFAULT 0,
   duration INTEGER DEFAULT 0,
+  quota INTEGER DEFAULT 0,
   max_uses INTEGER DEFAULT 1,
   used_count INTEGER DEFAULT 0,
   status INTEGER DEFAULT 1,
